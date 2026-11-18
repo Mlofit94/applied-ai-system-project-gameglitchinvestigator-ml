@@ -16,19 +16,23 @@ def get_range_for_difficulty(difficulty: str):
     if difficulty == "Normal":
         return 1, 100
     if difficulty == "Hard":
-        return 1, 50
+        # FIXED: Hard used to be 1-50, a smaller range than Normal (1-100).
+        return 1, 200
     return 1, 100
 
 
-def parse_guess(raw: str):
+def parse_guess(raw: str, low: int = None, high: int = None):
     """
     Parse user input into an int guess.
+
+    If low/high are given, guesses outside that range are rejected.
 
     Returns: (ok: bool, guess_int: int | None, error_message: str | None)
     """
     if raw is None:
         return False, None, "Enter a guess."
 
+    raw = raw.strip()
     if raw == "":
         return False, None, "Enter a guess."
 
@@ -39,6 +43,10 @@ def parse_guess(raw: str):
             value = int(raw)
     except Exception:
         return False, None, "That is not a number."
+
+    # FIXED: out-of-range guesses (e.g. 500 or -3) used to count as valid.
+    if low is not None and high is not None and not (low <= value <= high):
+        return False, None, f"Guess a number between {low} and {high}."
 
     return True, value, None
 
@@ -63,17 +71,15 @@ def check_guess(guess, secret):
 def update_score(current_score: int, outcome: str, attempt_number: int):
     """Update score based on outcome and attempt number."""
     if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
+        # FIXED: used attempt_number + 1, which charged an extra attempt.
+        points = 100 - 10 * attempt_number
         if points < 10:
             points = 10
         return current_score + points
 
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
-
-    if outcome == "Too Low":
+    # FIXED: "Too High" used to give +5 on even attempts; a wrong guess
+    # should always cost points, same as "Too Low".
+    if outcome in ("Too High", "Too Low"):
         return current_score - 5
 
     return current_score

@@ -7,6 +7,12 @@ def reset_game(state, low: int, high: int):
     state["secret"] = random.randint(low, high)
     state["status"] = "playing"
     state["history"] = []
+    state["hints"] = []  # [{"guess", "outcome"}] used by the AI opponent
+    state["used_clues"] = []  # math clue ids already given this game
+    state["questions_used"] = 0  # "Ask the AI" questions answered this game
+    state["chat"] = []  # [(role, text)] conversation with the AI
+    state["last_card"] = None  # last hint card shown (html)
+    state["last_trace"] = []  # what the AI did for the last hint
 
 
 def get_range_for_difficulty(difficulty: str):

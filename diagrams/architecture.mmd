@@ -1,0 +1,11 @@
+flowchart LR
+    P[Player guess or question] --> A[app.py]
+    A --> L[Glitch agent loop]
+    L -->|plans| G[Gemini]
+    G -->|calls tools| T[Python tools: game facts, patterns, math clues]
+    T --> G
+    G --> V[Validator]
+    V -->|passes| A
+    V -->|fails or API error| F[Rule-based fallback]
+    F --> A
+    L --> LOG[(logs/game_sessions.jsonl)]
